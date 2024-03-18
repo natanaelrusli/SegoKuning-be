@@ -18,6 +18,28 @@ type LoginRequest struct {
 	Password        string `json:"password"`
 }
 
+func (r *LoginRequest) Validate() error {
+	if r.CredentialType != "phone" && r.CredentialType != "email" {
+		return errors.New("credentialType should be either 'phone' or 'email'")
+	}
+
+	if r.CredentialType == "email" {
+		if !isValidEmail(r.CredentialValue) {
+			return errors.New("credentialValue should be in email format")
+		}
+	} else {
+		if !isValidPhoneNumber(r.CredentialValue) {
+			return errors.New("credentialValue should be a phone number format")
+		}
+	}
+
+	if len(r.Password) < 5 || len(r.Password) > 15 {
+		return errors.New("password length should be between 5 and 15 characters")
+	}
+
+	return nil
+}
+
 func (u *RegisterRequest) Validate() error {
 	if u.CredentialType != "phone" && u.CredentialType != "email" {
 		return errors.New("credentialType should be either 'phone' or 'email'")

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
@@ -22,37 +22,62 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err := req.Validate()
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	log.Println(req)
 
 	res, err := ah.authUsecase.RegisterUser(req.Name, req.CredentialValue, req.CredentialType, req.Password)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+
+	if err.Error() == "email already exists" || err.Error() == "phone number already exists" {
+		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(200, res)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, res)
 }
 
 func (ah *AuthHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
+	err := req.Validate()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user, token, err := ah.authUsecase.LoginUser(req.CredentialValue, req.CredentialType, req.Password)
+
+	if err != nil && err.Error() == "no user found with the provided credentials" {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	if err != nil && err.Error() == "invalid credentials" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
 
 	if err != nil {
 		c.JSON(500, err.Error())

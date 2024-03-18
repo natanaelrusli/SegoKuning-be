@@ -35,6 +35,22 @@ func NewAuthUsecaseImpl(
 }
 
 func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, password string) (*dto.UserData, error) {
+	// check user exists
+	var res *model.User
+	var err error
+
+	if credentialType == "email" {
+		res, err = au.userRepository.GetUserByEmail(credentialValue)
+		if res != nil && err == nil {
+			return nil, errors.New("email already exists")
+		}
+	} else {
+		res, err = au.userRepository.GetUserByPhone(credentialValue)
+		if res != nil && err == nil {
+			return nil, errors.New("phone number already exists")
+		}
+	}
+
 	var userData dto.UserData
 
 	hashedPassword, err := au.passwordEncryptor.Hash(password)
@@ -74,13 +90,20 @@ func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, p
 }
 
 func (au *authUsecaseImpl) LoginUser(credentials, credentialType, password string) (*model.User, string, error) {
-	res, err := au.userRepository.GetUserByPhone(credentials)
+	var res *model.User
+	var err error
+
+	if credentialType == "email" {
+		res, err = au.userRepository.GetUserByEmail(credentials)
+	} else {
+		res, err = au.userRepository.GetUserByPhone(credentials)
+	}
+
 	if err != nil {
 		return nil, "", err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(password)); err != nil {
-		// Passwords don't match, return an error
 		return nil, "", errors.New("invalid credentials")
 	}
 
