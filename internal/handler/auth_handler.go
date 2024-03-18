@@ -34,7 +34,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 
 	res, err := ah.authUsecase.RegisterUser(req.Name, req.CredentialValue, req.CredentialType, req.Password)
 
-	if err.Error() == "email already exists" || err.Error() == "phone number already exists" {
+	if err != nil && err.Error() == "email already exists" || err != nil && err.Error() == "phone number already exists" {
 		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}

@@ -34,17 +34,13 @@ func NewAuthUsecaseImpl(
 }
 
 func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, password string) (*dto.UserData, error) {
-	// check user exists
-	var res *model.User
-	var err error
-
 	if credentialType == "email" {
-		res, err = au.userRepository.GetUserByEmail(credentialValue)
+		res, err := au.userRepository.GetUserByEmail(credentialValue)
 		if res != nil && err == nil {
 			return nil, apperror.ErrEmailExists
 		}
-	} else {
-		res, err = au.userRepository.GetUserByPhone(credentialValue)
+	} else if credentialType == "phone" {
+		res, err := au.userRepository.GetUserByPhone(credentialValue)
 		if res != nil && err == nil {
 			return nil, apperror.ErrPhoneExists
 		}
@@ -72,20 +68,22 @@ func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, p
 		return nil, err
 	}
 
+	var newUserData dto.UserData
+
 	if credentialType == "email" {
-		userData = dto.UserData{
+		newUserData = dto.UserData{
 			Email: newUser.Email,
 		}
 	} else {
-		userData = dto.UserData{
+		newUserData = dto.UserData{
 			Phone: newUser.Phone,
 		}
 	}
 
-	userData.Name = newUser.Name
-	userData.AccessToken = "abcabcabc"
+	newUserData.Name = newUser.Name
+	newUserData.AccessToken = "abcabcabc"
 
-	return &userData, nil
+	return &newUserData, nil
 }
 
 func (au *authUsecaseImpl) LoginUser(credentials, credentialType, password string) (*model.User, string, error) {
