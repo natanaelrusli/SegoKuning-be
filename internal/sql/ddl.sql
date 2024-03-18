@@ -1,45 +1,59 @@
--- Create the 'users' table
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    credentialType VARCHAR(10) NOT NULL,
-    credentialValue VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR NOT NULL
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "email" VARCHAR,
+  "phone" VARCHAR,
+  "password" VARCHAR NOT NULL,
+  "name" VARCHAR NOT NULL,
+  "images_id" INTEGER,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "deleted_at" TIMESTAMP
 );
 
--- Create the 'profile' table
-CREATE TABLE profile (
-    id SERIAL PRIMARY KEY,
-    userId INT NOT NULL,
-    name VARCHAR(255),
-    imageUrl VARCHAR(255),
-    friendsId INT[],
-    friendCount INT,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (userId) REFERENCES users(id)
+CREATE TABLE "images" (
+  "id" SERIAL PRIMARY KEY,
+  "url" VARCHAR NOT NULL,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "deleted_at" TIMESTAMP
 );
 
--- Create the 'posts' table
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    postInHTML VARCHAR(500) NOT NULL,
-    tags VARCHAR(255)[] NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE "friendships" (
+  "id" SERIAL PRIMARY KEY,
+  "uid1" INTEGER,
+  "uid2" INTEGER,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "deleted_at" TIMESTAMP
 );
 
--- Create the 'comments' table
-CREATE TABLE comments (
-    id SERIAL PRIMARY KEY,
-    postsId INT NOT NULL,
-    userId INT NOT NULL,
-    comment VARCHAR(500) NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (postsId) REFERENCES posts(id),
-    FOREIGN KEY (userId) REFERENCES users(id)
+CREATE TABLE "posts" (
+  "id" SERIAL PRIMARY KEY,
+  "user_id" INTEGER,
+  "post_content" VARCHAR(500) NOT NULL,
+  "tags" VARCHAR NOT NULL,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "deleted_at" TIMESTAMP
 );
 
--- Create the 'images' table
-CREATE TABLE images (
-    id SERIAL PRIMARY KEY,
-    url VARCHAR(255) NOT NULL
+CREATE TABLE "comments" (
+  "id" SERIAL PRIMARY KEY,
+  "post_id" INTEGER,
+  "user_id" INTEGER,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "deleted_at" TIMESTAMP
 );
+
+COMMENT ON COLUMN "friendships"."uid1" IS 'will inserted twice';
+
+ALTER TABLE "users" ADD FOREIGN KEY ("images_id") REFERENCES "images" ("id");
+
+ALTER TABLE "friendships" ADD FOREIGN KEY ("uid1") REFERENCES "users" ("id");
+
+ALTER TABLE "friendships" ADD FOREIGN KEY ("uid2") REFERENCES "users" ("id");
+
+ALTER TABLE "posts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "comments" ADD FOREIGN KEY ("post_id") REFERENCES "posts" ("id");
+
+ALTER TABLE "comments" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
