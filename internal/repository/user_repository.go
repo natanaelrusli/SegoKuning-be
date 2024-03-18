@@ -7,8 +7,8 @@ import (
 )
 
 type UserRepository interface {
-	GetUser(credentials string) error
-	CreateUser(name, credentialType, credentialValue, password string) (*model.User, error)
+	GetUserByPhone(credentials string) (*model.User, error)
+	CreateUser(name, email, phone, password string, images_id int) (*model.User, error)
 }
 
 type userRepositoryPostgreSQL struct {
@@ -21,26 +21,25 @@ func NewUserRepository(db *sql.DB) *userRepositoryPostgreSQL {
 	}
 }
 
-func (ur *userRepositoryPostgreSQL) GetUser(credentials string) error {
-	query := "SELECT * FROM users WHERE credentialValue = $1"
+func (ur *userRepositoryPostgreSQL) GetUserByPhone(credentials string) (*model.User, error) {
+	var user model.User
+	query := "SELECT id, email, name, phone, password, name FROM users WHERE phone = $1"
 	row := ur.db.QueryRow(query, credentials)
 
-	var id int
-	var name, credentialType, credentialValue, password string
-
-	err := row.Scan(&id, &name, &credentialType, &credentialValue, &password)
+	err := row.Scan(&user.ID, &user.Email, &user.Name, &user.Phone, &user.Password, &user.Name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &user, nil
 }
 
-func (ur *userRepositoryPostgreSQL) CreateUser(name, credentialType, credentialValue, password string) (*model.User, error) {
+func (ur *userRepositoryPostgreSQL) CreateUser(name, email, phone, password string, images_id int) (*model.User, error) {
 	var newUser model.User
-	query := "INSERT INTO users (name, credentialType, credentialValue, password) VALUES ($1, $2, $3, $4) RETURNING credentialValue, name"
-	err := ur.db.QueryRow(query, name, credentialType, credentialValue, password).Scan(
-		&newUser.CredentialValue,
+	query := "INSERT INTO users (email, phone, password, name, images_id) VALUES ($1, $2, $3, $4, $5) RETURNING phone, email, name"
+	err := ur.db.QueryRow(query, email, phone, password, name, images_id).Scan(
+		&newUser.Phone,
+		&newUser.Email,
 		&newUser.Name,
 	)
 

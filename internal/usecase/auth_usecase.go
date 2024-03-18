@@ -1,15 +1,19 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
+	"github.com/natanaelrusli/segokuning-be/internal/model"
 	"github.com/natanaelrusli/segokuning-be/internal/pkg/encryptutils"
 	"github.com/natanaelrusli/segokuning-be/internal/pkg/jwtutils"
 	"github.com/natanaelrusli/segokuning-be/internal/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthUsecase interface {
 	RegisterUser(name, credentialValue, credentialType, password string) (*dto.UserData, error)
-	LoginUser(username, password string) (*dto.LoginRequest, error)
+	LoginUser(credentials, credentialType, password string) (*model.User, string, error)
 }
 
 type authUsecaseImpl struct {
@@ -38,18 +42,28 @@ func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, p
 		return nil, err
 	}
 
-	newUser, err := au.userRepository.CreateUser(name, credentialType, credentialValue, hashedPassword)
+	if credentialType == "email" {
+		userData = dto.UserData{
+			Email: credentialValue,
+		}
+	} else {
+		userData = dto.UserData{
+			Phone: credentialValue,
+		}
+	}
+
+	newUser, err := au.userRepository.CreateUser(name, userData.Email, userData.Phone, hashedPassword, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	if newUser.CredentialType == "email" {
+	if credentialType == "email" {
 		userData = dto.UserData{
-			Email: newUser.CredentialValue,
+			Email: newUser.Email,
 		}
 	} else {
 		userData = dto.UserData{
-			Phone: newUser.CredentialValue,
+			Phone: newUser.Phone,
 		}
 	}
 
@@ -59,6 +73,21 @@ func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, p
 	return &userData, nil
 }
 
-func (au *authUsecaseImpl) LoginUser(username, password string) (*dto.LoginRequest, error) {
-	return nil, nil
+func (au *authUsecaseImpl) LoginUser(credentials, credentialType, password string) (*model.User, string, error) {
+	res, err := au.userRepository.GetUserByPhone(credentials)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(password)); err != nil {
+		// Passwords don't match, return an error
+		return nil, "", errors.New("invalid credentials")
+	}
+
+	token, err := au.jwtUtil.Sign(int64(res.ID))
+	if err != nil {
+		return nil, "", err
+	}
+
+	return res, token, nil
 }
