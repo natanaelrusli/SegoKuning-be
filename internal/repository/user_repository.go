@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/natanaelrusli/segokuning-be/internal/apperror"
 	"github.com/natanaelrusli/segokuning-be/internal/model"
 )
 
@@ -31,7 +32,7 @@ func (ur *userRepositoryPostgreSQL) GetUserByPhone(credentials string) (*model.U
 	err := row.Scan(&user.ID, &user.Email, &user.Name, &user.Phone, &user.Password, &user.Name)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("no user found with the provided credentials")
+			return nil, apperror.ErrNoUserFound
 		}
 		return nil, err
 	}

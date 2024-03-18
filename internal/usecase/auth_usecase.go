@@ -1,8 +1,7 @@
 package usecase
 
 import (
-	"errors"
-
+	"github.com/natanaelrusli/segokuning-be/internal/apperror"
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
 	"github.com/natanaelrusli/segokuning-be/internal/model"
 	"github.com/natanaelrusli/segokuning-be/internal/pkg/encryptutils"
@@ -42,12 +41,12 @@ func (au *authUsecaseImpl) RegisterUser(name, credentialValue, credentialType, p
 	if credentialType == "email" {
 		res, err = au.userRepository.GetUserByEmail(credentialValue)
 		if res != nil && err == nil {
-			return nil, errors.New("email already exists")
+			return nil, apperror.ErrEmailExists
 		}
 	} else {
 		res, err = au.userRepository.GetUserByPhone(credentialValue)
 		if res != nil && err == nil {
-			return nil, errors.New("phone number already exists")
+			return nil, apperror.ErrPhoneExists
 		}
 	}
 
@@ -104,7 +103,7 @@ func (au *authUsecaseImpl) LoginUser(credentials, credentialType, password strin
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(password)); err != nil {
-		return nil, "", errors.New("invalid credentials")
+		return nil, "", apperror.ErrInvalidCredentials
 	}
 
 	token, err := au.jwtUtil.Sign(int64(res.ID))

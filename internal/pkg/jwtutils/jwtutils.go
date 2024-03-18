@@ -1,10 +1,10 @@
 package jwtutils
 
 import (
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/natanaelrusli/segokuning-be/internal/apperror"
 	"github.com/natanaelrusli/segokuning-be/internal/config"
 )
 
@@ -67,7 +67,7 @@ func (j *jwtUtil) Parse(tokenStr string) (*MyAuthClaims, error) {
 	if claims, ok := token.Claims.(*MyAuthClaims); ok && token.Valid {
 		res = *claims
 	} else {
-		return nil, errors.New("token invalid")
+		return nil, apperror.ErrInvalidToken
 	}
 
 	return &res, nil
