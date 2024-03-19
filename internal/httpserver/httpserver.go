@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/natanaelrusli/segokuning-be/internal/config"
 	"github.com/natanaelrusli/segokuning-be/internal/handler"
+	"github.com/natanaelrusli/segokuning-be/internal/httpserver/middleware"
 	"github.com/natanaelrusli/segokuning-be/internal/pkg/database"
 	"github.com/natanaelrusli/segokuning-be/internal/pkg/encryptutils"
 	"github.com/natanaelrusli/segokuning-be/internal/pkg/jwtutils"
@@ -23,6 +24,7 @@ func InitGinServer(cfg *config.Config) {
 
 	passwordEncryptor := encryptutils.NewBcryptPasswordEncryptor(cfg.App.BCryptCost)
 	jwtUtil := jwtutils.NewJWTUtil(cfg.Jwt)
+	authMiddleware := middleware.NewAuthMiddleware(jwtUtil)
 
 	r := gin.New()
 
@@ -32,6 +34,13 @@ func InitGinServer(cfg *config.Config) {
 
 	r.POST("/v1/user/register", authHandler.Register)
 	r.POST("/v1/user/login", authHandler.Login)
+
+	ar := r.Group("")
+	ar.Use(authMiddleware.RequireToken())
+	{
+		ar.POST("/v1/user/link/email", authHandler.LinkEmail)
+		ar.POST("/v1/user/link/phone", authHandler.LinkPhone)
+	}
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.HttpServer.Host, cfg.HttpServer.Port),
