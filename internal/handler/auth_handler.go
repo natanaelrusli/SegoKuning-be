@@ -168,6 +168,6 @@ func (ah *AuthHandler) LinkPhone(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "link email success",
+		"message": "link phone success",
 	})
 }

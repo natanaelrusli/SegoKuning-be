@@ -124,14 +124,10 @@ func (au *authUsecaseImpl) LinkEmail(id int64, email string) error {
 		return apperror.ErrAlreadyHaveEmail
 	}
 
-	user, err = au.userRepository.GetUserByEmail(email)
+	user, _ = au.userRepository.GetUserByEmail(email)
 
 	if user != nil {
 		return apperror.ErrEmailExists
-	}
-
-	if err != nil {
-		return err
 	}
 
 	err = au.userRepository.AddEmail(id, email)
@@ -148,18 +144,14 @@ func (au *authUsecaseImpl) LinkPhone(id int64, phone string) error {
 		return err
 	}
 
-	if user.Email != "" {
+	if user.Phone != "" {
 		return apperror.ErrAlreadyHavePhone
 	}
 
-	user, err = au.userRepository.GetUserByPhone(phone)
+	user, _ = au.userRepository.GetUserByPhone(phone)
 
 	if user != nil {
 		return apperror.ErrPhoneExists
-	}
-
-	if err != nil {
-		return err
 	}
 
 	err = au.userRepository.AddPhone(id, phone)
