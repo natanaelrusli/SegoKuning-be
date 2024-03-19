@@ -19,6 +19,34 @@ type LoginRequest struct {
 	Password        string `json:"password"`
 }
 
+type LinkEmailRequest struct {
+	Email string `json:"email"`
+}
+
+type LinkPhoneRequest struct {
+	Phone string `json:"Phone"`
+}
+
+func (r *LinkEmailRequest) Validate() error {
+	valid := isValidEmail(r.Email)
+
+	if !valid {
+		return apperror.ErrInvalidEmail
+	}
+
+	return nil
+}
+
+func (r *LinkPhoneRequest) Validate() error {
+	valid := isValidPhoneNumber(r.Phone)
+
+	if !valid {
+		return apperror.ErrInvalidPhone
+	}
+
+	return nil
+}
+
 func (r *LoginRequest) Validate() error {
 	if r.CredentialType != "phone" && r.CredentialType != "email" {
 		return apperror.ErrInvalidCredentials

@@ -14,3 +14,6 @@ var ErrInvalidNameLength = errors.New("name length should be between 5 and 50 ch
 var ErrInvalidPasswordLength = errors.New("password length should be between 5 and 50 characters")
 
 var ErrInvalidToken = errors.New("token invalid")
+
+var ErrAlreadyHaveEmail = errors.New("this account already have a linked email address")
+var ErrAlreadyHavePhone = errors.New("this account already have a linked phone number")

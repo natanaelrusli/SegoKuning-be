@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelrusli/segokuning-be/internal/apperror"
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
 	"github.com/natanaelrusli/segokuning-be/internal/usecase"
 )
@@ -97,4 +98,76 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 		Data:    loginUserData,
 	}
 	c.JSON(200, data)
+}
+
+func (ah *AuthHandler) LinkEmail(c *gin.Context) {
+	var req dto.LinkEmailRequest
+	userId := c.Value("ctx-user-id").(int64)
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := req.Validate()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = ah.authUsecase.LinkEmail(userId, req.Email)
+	if err != nil && err == apperror.ErrAlreadyHaveEmail {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err != nil && err == apperror.ErrEmailExists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "link email success",
+	})
+}
+
+func (ah *AuthHandler) LinkPhone(c *gin.Context) {
+	var req dto.LinkPhoneRequest
+	userId := c.Value("ctx-user-id").(int64)
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := req.Validate()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = ah.authUsecase.LinkPhone(userId, req.Phone)
+	if err != nil && err == apperror.ErrAlreadyHaveEmail {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err != nil && err == apperror.ErrEmailExists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "link email success",
+	})
 }

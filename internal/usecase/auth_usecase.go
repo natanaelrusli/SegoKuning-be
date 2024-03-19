@@ -13,6 +13,8 @@ import (
 type AuthUsecase interface {
 	RegisterUser(name, credentialValue, credentialType, password string) (*dto.UserData, error)
 	LoginUser(credentials, credentialType, password string) (*model.User, string, error)
+	LinkPhone(id int64, phone string) error
+	LinkEmail(id int64, email string) error
 }
 
 type authUsecaseImpl struct {
@@ -110,4 +112,60 @@ func (au *authUsecaseImpl) LoginUser(credentials, credentialType, password strin
 	}
 
 	return res, token, nil
+}
+
+func (au *authUsecaseImpl) LinkEmail(id int64, email string) error {
+	user, err := au.userRepository.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	if user.Email != "" {
+		return apperror.ErrAlreadyHaveEmail
+	}
+
+	user, err = au.userRepository.GetUserByEmail(email)
+
+	if user != nil {
+		return apperror.ErrEmailExists
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = au.userRepository.AddEmail(id, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (au *authUsecaseImpl) LinkPhone(id int64, phone string) error {
+	user, err := au.userRepository.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	if user.Email != "" {
+		return apperror.ErrAlreadyHavePhone
+	}
+
+	user, err = au.userRepository.GetUserByPhone(phone)
+
+	if user != nil {
+		return apperror.ErrPhoneExists
+	}
+
+	if err != nil {
+		return err
+	}
+
+	err = au.userRepository.AddPhone(id, phone)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
