@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,7 @@ func (ih *ImageHandler) UploadImage(c *gin.Context) {
 	}
 
 	res, err := ih.imageUsecase.UploadImage(req.File)
+	log.Println(err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Error uploading image, please try again",

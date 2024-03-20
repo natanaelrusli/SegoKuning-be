@@ -34,7 +34,7 @@ func NewImageRepository(db *sql.DB) *imageRepositoryPostgreSQL {
 // note if you forget, we use pointer type *imageRepository... because we want to get the memory address and change the actual variable, because in Go, when we pass variable it makes a copy of the params
 func (ir *imageRepositoryPostgreSQL) CreateOne(url string) (*model.Image, error) {
 	var newImage model.Image
-	query := "INSERT INTO images (url) VALUES ($1) RETURNING id"
+	query := "INSERT INTO images (url) VALUES ($1) RETURNING id, url"
 	// QueryRow execute query and expect to return at most one row
 	// Scan copies the columns from the matched row into the variable
 	err := ir.db.QueryRow(query, url).Scan(&newImage.ID, &newImage.URL)
