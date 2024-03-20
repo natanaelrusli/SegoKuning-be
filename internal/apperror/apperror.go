@@ -17,6 +17,9 @@ var ErrInvalidToken = errors.New("token invalid")
 
 var ErrAlreadyHaveEmail = errors.New("this account already have a linked email address")
 var ErrAlreadyHavePhone = errors.New("this account already have a linked phone number")
+var ErrImageURLEmpty = errors.New("imageUrl cannot be empty")
+var ErrInvalidImageURL = errors.New("imageUrl must be a valid URL")
+var ErrNoName = errors.New("name cannot be empty")
 
 var ErrImageType = errors.New("file type should be in jgp or jpeg format")
 var ErrImageSizeBelow = errors.New("file size should not be less than 10KB")

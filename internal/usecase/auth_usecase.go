@@ -15,10 +15,12 @@ type AuthUsecase interface {
 	LoginUser(credentials, credentialType, password string) (*model.User, string, error)
 	LinkPhone(id int64, phone string) error
 	LinkEmail(id int64, email string) error
+	UpdateUserInfo(id int64, imageUrl, name string) error
 }
 
 type authUsecaseImpl struct {
 	userRepository    repository.UserRepository
+	imageRepository   repository.ImageRepository
 	passwordEncryptor encryptutils.PasswordEncryptor
 	jwtUtil           jwtutils.JWTUtil
 }
@@ -26,11 +28,13 @@ type authUsecaseImpl struct {
 func NewAuthUsecaseImpl(
 	userRepository repository.UserRepository,
 	passwordEncryptor encryptutils.PasswordEncryptor,
+	imageRepository repository.ImageRepository,
 	jwtUtil jwtutils.JWTUtil,
 ) *authUsecaseImpl {
 	return &authUsecaseImpl{
 		userRepository:    userRepository,
 		passwordEncryptor: passwordEncryptor,
+		imageRepository:   imageRepository,
 		jwtUtil:           jwtUtil,
 	}
 }
@@ -155,6 +159,21 @@ func (au *authUsecaseImpl) LinkPhone(id int64, phone string) error {
 	}
 
 	err = au.userRepository.AddPhone(id, phone)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (au *authUsecaseImpl) UpdateUserInfo(id int64, imageUrl, name string) error {
+	// need to insert new data to image table => get the image id => put the id in the users data
+	image, err := au.imageRepository.CreateOne(imageUrl)
+	if err != nil {
+		return err
+	}
+
+	err = au.userRepository.UpdateUserInfo(id, image.ID, name)
 	if err != nil {
 		return err
 	}

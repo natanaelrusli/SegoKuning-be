@@ -2,6 +2,7 @@ package dto
 
 import (
 	"mime/multipart"
+	"net/url"
 	"regexp"
 
 	"github.com/natanaelrusli/segokuning-be/internal/apperror"
@@ -31,6 +32,32 @@ type LinkPhoneRequest struct {
 type ImageUploadRequest struct {
 	File *multipart.FileHeader `form:"file"`
 	// File       multipart.File        // File represents the uploaded file.
+}
+
+type UpdateProfileRequest struct {
+	ImageURL string `json:"imageUrl" validate:"required,url"`
+	Name     string `json:"name" validate:"required,min=5,max=50"`
+}
+
+func (r *UpdateProfileRequest) Validate() error {
+	if r.ImageURL == "" {
+		return apperror.ErrImageURLEmpty
+	}
+
+	_, err := url.ParseRequestURI(r.ImageURL)
+	if err != nil {
+		return apperror.ErrInvalidImageURL
+	}
+
+	if r.Name == "" {
+		return apperror.ErrNoName
+	}
+
+	if len(r.Name) < 5 || len(r.Name) > 50 {
+		return apperror.ErrInvalidNameLength
+	}
+
+	return nil
 }
 
 func (r *LinkEmailRequest) Validate() error {

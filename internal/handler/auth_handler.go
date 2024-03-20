@@ -171,3 +171,31 @@ func (ah *AuthHandler) LinkPhone(c *gin.Context) {
 		"message": "link phone success",
 	})
 }
+
+func (ah *AuthHandler) UpdateAccount(c *gin.Context) {
+	var req dto.UpdateProfileRequest
+	userId := c.Value("ctx-user-id").(int64)
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := req.Validate()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = ah.authUsecase.UpdateUserInfo(userId, req.ImageURL, req.Name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "Profile updated",
+	})
+}
