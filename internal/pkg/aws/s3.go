@@ -72,5 +72,6 @@ func ImageUpload(sourceFile *multipart.FileHeader) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return urlStr, nil
 }

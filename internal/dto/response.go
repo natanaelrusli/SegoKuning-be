@@ -23,3 +23,8 @@ type LoginResponse struct {
 	Message string        `json:"message"`
 	Data    LoginUserData `json:"data"`
 }
+
+type ImageData struct {
+	ID  int64  `json:"id"`
+	URL string `json:"url"`
+}

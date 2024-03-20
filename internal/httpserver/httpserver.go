@@ -28,9 +28,17 @@ func InitGinServer(cfg *config.Config) {
 
 	r := gin.New()
 
+	// repository
 	userRepository := repository.NewUserRepository(db)
+	imageRepository := repository.NewImageRepository(db)
+
+	// usecase
 	authUsecase := usecase.NewAuthUsecaseImpl(userRepository, passwordEncryptor, jwtUtil)
+	imageUsecase := usecase.NewImageUsecaseImpl(imageRepository)
+
+	// handler
 	authHandler := handler.NewAuthHandler(authUsecase)
+	imageHandler := handler.NewImageHandler(imageUsecase)
 
 	r.POST("/v1/user/register", authHandler.Register)
 	r.POST("/v1/user/login", authHandler.Login)
@@ -40,6 +48,13 @@ func InitGinServer(cfg *config.Config) {
 	{
 		ar.POST("/v1/user/link/email", authHandler.LinkEmail)
 		ar.POST("/v1/user/link/phone", authHandler.LinkPhone)
+	}
+
+	v1 := r.Group("/v1")
+
+	imageV1 := v1.Group("/image")
+	{
+		imageV1.POST("/", imageHandler.UploadImage)
 	}
 
 	srv := &http.Server{

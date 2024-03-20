@@ -17,3 +17,7 @@ var ErrInvalidToken = errors.New("token invalid")
 
 var ErrAlreadyHaveEmail = errors.New("this account already have a linked email address")
 var ErrAlreadyHavePhone = errors.New("this account already have a linked phone number")
+
+var ErrImageType = errors.New("file type should be in jgp or jpeg format")
+var ErrImageSizeBelow = errors.New("file size should not be less than 10KB")
+var ErrImageSizeAbove = errors.New("file size should not be more than 2MB")

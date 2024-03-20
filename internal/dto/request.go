@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"mime/multipart"
 	"regexp"
 
 	"github.com/natanaelrusli/segokuning-be/internal/apperror"
@@ -25,6 +26,11 @@ type LinkEmailRequest struct {
 
 type LinkPhoneRequest struct {
 	Phone string `json:"Phone"`
+}
+
+type ImageUploadRequest struct {
+	File *multipart.FileHeader `form:"file"`
+	// File       multipart.File        // File represents the uploaded file.
 }
 
 func (r *LinkEmailRequest) Validate() error {
@@ -90,6 +96,23 @@ func (u *RegisterRequest) Validate() error {
 
 	if len(u.Password) < 5 || len(u.Password) > 15 {
 		return apperror.ErrInvalidPasswordLength
+	}
+
+	return nil
+}
+
+func (r *ImageUploadRequest) Validate() error {
+	// Check file type, must in *.jpg | *.jpeg format
+	if r.File.Header.Get("Content-Type") != "image/jpeg" && r.File.Header.Get("Content-Type") != "image/jpg" {
+		return apperror.ErrImageType
+	}
+
+	// Check file size, no more than 2MB, no less than 10KB
+	if r.File.Size < 10*1024 {
+		return apperror.ErrImageSizeBelow
+	}
+	if r.File.Size > 2*1024*1024 {
+		return apperror.ErrImageSizeAbove
 	}
 
 	return nil
