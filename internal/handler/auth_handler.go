@@ -181,7 +181,13 @@ func (ah *AuthHandler) UpdateAccount(c *gin.Context) {
 		return
 	}
 
-	err := ah.authUsecase.UpdateUserInfo(userId, req.ImageUrl, req.Name)
+	err := req.Validate()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = ah.authUsecase.UpdateUserInfo(userId, req.ImageURL, req.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
