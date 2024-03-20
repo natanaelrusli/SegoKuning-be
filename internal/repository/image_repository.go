@@ -38,7 +38,6 @@ func (ir *imageRepositoryPostgreSQL) CreateOne(url string) (*model.Image, error)
 	// QueryRow execute query and expect to return at most one row
 	// Scan copies the columns from the matched row into the variable
 	err := ir.db.QueryRow(query, url).Scan(&newImage.ID, &newImage.URL)
-
 	if err != nil {
 		return nil, err
 	}
