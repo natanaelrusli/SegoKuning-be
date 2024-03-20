@@ -15,7 +15,7 @@ type UserRepository interface {
 	CreateUser(name, email, phone, password string, images_id int) (*model.User, error)
 	AddEmail(id int64, email string) error
 	AddPhone(id int64, phone string) error
-	UpdateUserInfo(id int64, imageUrl, name string) error
+	UpdateUserInfo(id int64, imageId int, name string) error
 }
 
 type userRepositoryPostgreSQL struct {
@@ -112,9 +112,9 @@ func (ur *userRepositoryPostgreSQL) AddPhone(id int64, phone string) error {
 	return nil
 }
 
-func (ur *userRepositoryPostgreSQL) UpdateUserInfo(id int64, imageUrl, name string) error {
+func (ur *userRepositoryPostgreSQL) UpdateUserInfo(id int64, imageId int, name string) error {
 	query := "UPDATE users SET images_id = $1, name = $2 WHERE id = $3"
-	_, err := ur.db.Exec(query, 1, name, id)
+	_, err := ur.db.Exec(query, imageId, name, id)
 	if err != nil {
 		return err
 	}

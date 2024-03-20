@@ -33,7 +33,7 @@ func InitGinServer(cfg *config.Config) {
 	imageRepository := repository.NewImageRepository(db)
 
 	// usecase
-	authUsecase := usecase.NewAuthUsecaseImpl(userRepository, passwordEncryptor, jwtUtil)
+	authUsecase := usecase.NewAuthUsecaseImpl(userRepository, passwordEncryptor, imageRepository, jwtUtil)
 	imageUsecase := usecase.NewImageUsecaseImpl(imageRepository)
 
 	// handler
