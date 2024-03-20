@@ -33,6 +33,11 @@ type ImageUploadRequest struct {
 	// File       multipart.File        // File represents the uploaded file.
 }
 
+type UpdateProfileRequest struct {
+	ImageUrl string `json:"imageUrl"`
+	Name     string `json:"name"`
+}
+
 func (r *LinkEmailRequest) Validate() error {
 	valid := isValidEmail(r.Email)
 

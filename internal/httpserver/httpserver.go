@@ -48,6 +48,7 @@ func InitGinServer(cfg *config.Config) {
 	{
 		ar.POST("/v1/user/link/email", authHandler.LinkEmail)
 		ar.POST("/v1/user/link/phone", authHandler.LinkPhone)
+		ar.PATCH("/v1/user", authHandler.UpdateAccount)
 	}
 
 	v1 := r.Group("/v1")
