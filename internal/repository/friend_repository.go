@@ -3,14 +3,15 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
+	"github.com/natanaelrusli/segokuning-be/internal/apperror"
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
 	"github.com/natanaelrusli/segokuning-be/internal/model"
 )
 
 type FriendRepository interface {
 	GetFriendsByUserID(friendQuery dto.FriendQuery) ([]model.FriendUserData, error)
+	AddFriendByUserID(userId, targetUserId int64) error
 }
 
 type friendRepositoryImpl struct {
@@ -81,9 +82,6 @@ func (fr *friendRepositoryImpl) GetFriendsByUserID(friendQuery dto.FriendQuery) 
 	args = append(args, int64(friendQuery.Offset))
 	query += fmt.Sprintf(" OFFSET $%d", len(args))
 
-	log.Println(query)
-	log.Println(args...)
-
 	rows, err := fr.db.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -103,4 +101,26 @@ func (fr *friendRepositoryImpl) GetFriendsByUserID(friendQuery dto.FriendQuery) 
 	}
 
 	return users, nil
+}
+
+func (fr *friendRepositoryImpl) AddFriendByUserID(userId, targetUserId int64) error {
+	var count int
+
+	queryCheck := "SELECT COUNT(*) FROM friendships WHERE (uid1 = $1 AND uid2 = $2) OR (uid1 = $2 AND uid2 = $1)"
+	err := fr.db.QueryRow(queryCheck, userId, targetUserId).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return apperror.ErrAlreadyFriend
+	}
+
+	queryInsert := "INSERT INTO friendships (uid1, uid2) VALUES ($1, $2)"
+	_, err = fr.db.Exec(queryInsert, userId, targetUserId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

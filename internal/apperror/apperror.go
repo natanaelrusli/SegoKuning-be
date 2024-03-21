@@ -24,3 +24,6 @@ var ErrNoName = errors.New("name cannot be empty")
 var ErrImageType = errors.New("file type should be in jgp or jpeg format")
 var ErrImageSizeBelow = errors.New("file size should not be less than 10KB")
 var ErrImageSizeAbove = errors.New("file size should not be more than 2MB")
+
+var ErrAlreadyFriend = errors.New("friendship already exists")
+var ErrAddSelf = errors.New("cannot add self")
