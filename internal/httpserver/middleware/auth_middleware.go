@@ -40,7 +40,7 @@ func (m *AuthMiddleware) RequireToken() gin.HandlerFunc {
 		tokenString := authStrs[1]
 		claims, err := m.jwtUtil.Parse(tokenString)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": fmt.Sprintf("invalid token - %v", err.Error()),
 			})
 			return
