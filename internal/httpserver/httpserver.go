@@ -31,17 +31,22 @@ func InitGinServer(cfg *config.Config) {
 	// repository
 	userRepository := repository.NewUserRepository(db)
 	imageRepository := repository.NewImageRepository(db)
+	postRepository := repository.NewPostRepository(db)
 
 	// usecase
 	authUsecase := usecase.NewAuthUsecaseImpl(userRepository, passwordEncryptor, imageRepository, jwtUtil)
 	imageUsecase := usecase.NewImageUsecaseImpl(imageRepository)
+	postUsecase := usecase.NewPostUsecaseImpl(postRepository)
 
 	// handler
 	authHandler := handler.NewAuthHandler(authUsecase)
 	imageHandler := handler.NewImageHandler(imageUsecase)
+	postHandler := handler.NewPostHandler(postUsecase)
 
 	r.POST("/v1/user/register", authHandler.Register)
 	r.POST("/v1/user/login", authHandler.Login)
+
+	r.POST("/v1/post", postHandler.Create)
 
 	ar := r.Group("")
 	ar.Use(authMiddleware.RequireToken())

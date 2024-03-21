@@ -42,3 +42,24 @@ VALUES
 (3, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 (4, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
 (5, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+
+-- SELECT id, user_id, post_content, tags, created_at
+-- FROM public.posts
+-- WHERE post_content LIKE '%%'
+-- AND tags LIKE '%tag%'
+-- ORDER BY created_at desc  
+-- OFFSET 0
+-- LIMIT 10;
+// limit 
+// offset
+// search
+// searchtags []string
+
+
+-- select id, user_id, post_content, tags, created_at 
+-- FROM public.posts p  
+-- WHERE post_content LIKE '%Post%' 
+--    AND tags LIKE '%1%' 
+-- ORDER BY created_at DESC 
+-- OFFSET 0 
+-- LIMIT 10;

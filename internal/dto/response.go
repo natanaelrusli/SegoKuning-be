@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type UserRegistrationResponse struct {
 	Message string   `json:"message"`
 	Data    UserData `json:"data"`
@@ -27,4 +29,17 @@ type LoginResponse struct {
 type ImageData struct {
 	ID  int64  `json:"id"`
 	URL string `json:"url"`
+}
+
+type PostData struct {
+	ID         int64     `json:"id"`
+	UserId     int64     `json:"userId"`
+	PostInHtml string    `json:"postInHtml"`
+	Tags       []string  `json:"tags"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
+type CreatePostResponse struct {
+	Message string   `json:"message"`
+	Data    PostData `json:"data"`
 }

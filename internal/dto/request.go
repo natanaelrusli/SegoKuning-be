@@ -30,13 +30,17 @@ type LinkPhoneRequest struct {
 }
 
 type ImageUploadRequest struct {
-	File *multipart.FileHeader `form:"file"`
-	// File       multipart.File        // File represents the uploaded file.
+	File *multipart.FileHeader `form:"file" validate:"required"`
 }
 
 type UpdateProfileRequest struct {
 	ImageURL string `json:"imageUrl" validate:"required,url"`
 	Name     string `json:"name" validate:"required,min=5,max=50"`
+}
+
+type CreatePostRequest struct {
+	PostInHtml string   `json:"postInHtml" validate:"required,min=2,max=500"`
+	Tags       []string `json:"tags" binding:"required"`
 }
 
 func (r *UpdateProfileRequest) Validate() error {
@@ -129,17 +133,30 @@ func (u *RegisterRequest) Validate() error {
 }
 
 func (r *ImageUploadRequest) Validate() error {
-	// Check file type, must in *.jpg | *.jpeg format
-	if r.File.Header.Get("Content-Type") != "image/jpeg" && r.File.Header.Get("Content-Type") != "image/jpg" {
-		return apperror.ErrImageType
+	// // Check file type, must in *.jpg | *.jpeg format
+	// if r.File.Header.Get("Content-Type") != "image/jpeg" && r.File.Header.Get("Content-Type") != "image/jpg" {
+	// 	return apperror.ErrImageType
+	// }
+
+	// // Check file size, no more than 2MB, no less than 10KB
+	// if r.File.Size < 10*1024 {
+	// 	return apperror.ErrImageSizeBelow
+	// }
+
+	// if r.File.Size > 2*1024*1024 {
+	// 	return apperror.ErrImageSizeAbove
+	// }
+
+	return nil
+}
+
+func (r *CreatePostRequest) Validate() error {
+	if len(r.PostInHtml) < 2 || len(r.PostInHtml) > 500 {
+		return apperror.ErrPostInvalidLength
 	}
 
-	// Check file size, no more than 2MB, no less than 10KB
-	if r.File.Size < 10*1024 {
-		return apperror.ErrImageSizeBelow
-	}
-	if r.File.Size > 2*1024*1024 {
-		return apperror.ErrImageSizeAbove
+	if len(r.Tags) < 1 {
+		return apperror.ErrPostTagsEmpty
 	}
 
 	return nil
