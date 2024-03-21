@@ -50,6 +50,10 @@ type FriendQuery struct {
 	Search     string `form:"search"`
 }
 
+type FriendRequest struct {
+	UserId int64 `json:"userId"`
+}
+
 func (r *UpdateProfileRequest) Validate() error {
 	if r.ImageURL == "" {
 		return apperror.ErrImageURLEmpty

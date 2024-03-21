@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelrusli/segokuning-be/internal/apperror"
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
 	"github.com/natanaelrusli/segokuning-be/internal/usecase"
 )
@@ -69,6 +70,45 @@ func (fh *FriendHandler) GetFriendList(c *gin.Context) {
 }
 
 func (fh *FriendHandler) AddFriend(c *gin.Context) {
+	var req dto.FriendRequest
+	userId := c.Value("ctx-user-id").(int64)
+
+	err := c.BindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = fh.friendUsecase.AddFriend(userId, req.UserId)
+	if err != nil {
+		if err == apperror.ErrNoUserFound {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		} else if err == apperror.ErrAlreadyFriend {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		} else if err == apperror.ErrAddSelf {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Add friend",
 	})
