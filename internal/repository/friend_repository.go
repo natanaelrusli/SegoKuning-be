@@ -12,6 +12,7 @@ import (
 type FriendRepository interface {
 	GetFriendsByUserID(friendQuery dto.FriendQuery) ([]model.FriendUserData, error)
 	AddFriendByUserID(userId, targetUserId int64) error
+	DeleteFriendByUserID(userId, targetUserId int64) error
 }
 
 type friendRepositoryImpl struct {
@@ -123,4 +124,22 @@ func (fr *friendRepositoryImpl) AddFriendByUserID(userId, targetUserId int64) er
 	}
 
 	return nil
+}
+
+func (fr *friendRepositoryImpl) DeleteFriendByUserID(userId, targetUserId int64) error {
+	var count int
+	queryCheck := "SELECT COUNT(*) FROM friendships WHERE (uid1 = $1 AND uid2 = $2) OR (uid1 = $2 AND uid2 = $1)"
+	err := fr.db.QueryRow(queryCheck, userId, targetUserId).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return apperror.ErrNotFriend
+	}
+
+	query := "DELETE from friendships WHERE (uid1 = $1 and uid2 = $2) or (uid1 = $2 and uid2 = $1);"
+	_, err = fr.db.Exec(query, targetUserId, userId)
+
+	return err
 }
