@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/natanaelrusli/segokuning-be/internal/dto"
@@ -20,14 +19,35 @@ func NewFriendHandler(friendUsecase usecase.FriendUsecase) *FriendHandler {
 }
 
 func (fh *FriendHandler) GetFriendList(c *gin.Context) {
-	limit, _ := strconv.ParseInt(c.Query("limit"), 10, 64)
-	offset, _ := strconv.ParseInt(c.Query("offset"), 10, 64)
+	var friendQuery dto.FriendQuery
 
-	if limit == 0 {
-		limit = 5
+	err := c.ShouldBindQuery(&friendQuery)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 
-	res, err := fh.friendUsecase.GetFriendList(1, int64(limit), int64(offset))
+	friendQuery.UserId = c.Value("ctx-user-id").(int64)
+
+	if friendQuery.Limit == 0 {
+		friendQuery.Limit = 5
+	}
+
+	if friendQuery.Offset == 0 {
+		friendQuery.Offset = 0
+	}
+
+	if friendQuery.SortBy == "" {
+		friendQuery.SortBy = "createdAt"
+	}
+
+	if friendQuery.OrderBy == "" {
+		friendQuery.OrderBy = "desc"
+	}
+
+	res, err := fh.friendUsecase.GetFriendList(friendQuery)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"error": err.Error(),
@@ -39,8 +59,8 @@ func (fh *FriendHandler) GetFriendList(c *gin.Context) {
 		Message: res.Messagge,
 		Data:    res.Data,
 		Meta: dto.PaginationMeta{
-			Limit:  int(limit),
-			Offset: int(offset),
+			Limit:  int(friendQuery.Limit),
+			Offset: int(friendQuery.Offset),
 			Total:  len(res.Data),
 		},
 	}

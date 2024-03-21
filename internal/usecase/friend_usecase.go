@@ -6,7 +6,7 @@ import (
 )
 
 type FriendUsecase interface {
-	GetFriendList(userId, limit, offset int64) (*dto.FriendsResponse, error)
+	GetFriendList(friendQuery dto.FriendQuery) (*dto.FriendsResponse, error)
 }
 
 type friendUsecaseImpl struct {
@@ -24,10 +24,10 @@ func NewFriendUsecaseImpl(
 	}
 }
 
-func (fu *friendUsecaseImpl) GetFriendList(userId, limit, offset int64) (*dto.FriendsResponse, error) {
+func (fu *friendUsecaseImpl) GetFriendList(friendQuery dto.FriendQuery) (*dto.FriendsResponse, error) {
 	var res dto.FriendsResponse
 
-	users, err := fu.friendRepository.GetFriendsByUserID(userId, limit, offset)
+	users, err := fu.friendRepository.GetFriendsByUserID(friendQuery)
 	if err != nil {
 		return nil, err
 	}

@@ -39,6 +39,17 @@ type UpdateProfileRequest struct {
 	Name     string `json:"name" validate:"required,min=5,max=50"`
 }
 
+type FriendQuery struct {
+	// validate this
+	UserId     int64
+	Limit      int    `form:"limit"`
+	Offset     int    `form:"offset"`
+	OrderBy    string `form:"orderBy"`
+	SortBy     string `form:"sortBy"`
+	OnlyFriend bool   `form:"onlyFriend"`
+	Search     string `form:"search"`
+}
+
 func (r *UpdateProfileRequest) Validate() error {
 	if r.ImageURL == "" {
 		return apperror.ErrImageURLEmpty
