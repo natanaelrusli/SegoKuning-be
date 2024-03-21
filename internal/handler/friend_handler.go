@@ -115,7 +115,36 @@ func (fh *FriendHandler) AddFriend(c *gin.Context) {
 }
 
 func (fh *FriendHandler) RemoveFriend(c *gin.Context) {
+	var req dto.FriendRequest
+	userId := c.Value("ctx-user-id").(int64)
+	err := c.BindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = fh.friendUsecase.RemoveFriend(userId, req.UserId)
+	if err != nil {
+		if err == apperror.ErrNotFriend {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		} else if err == apperror.ErrNoUserFound {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Delete friend",
+		"message": "Delete friend success",
 	})
 }

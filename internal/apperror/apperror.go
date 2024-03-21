@@ -26,4 +26,5 @@ var ErrImageSizeBelow = errors.New("file size should not be less than 10KB")
 var ErrImageSizeAbove = errors.New("file size should not be more than 2MB")
 
 var ErrAlreadyFriend = errors.New("friendship already exists")
+var ErrNotFriend = errors.New("this user is not a friend")
 var ErrAddSelf = errors.New("cannot add self")
