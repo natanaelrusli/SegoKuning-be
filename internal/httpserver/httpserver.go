@@ -31,14 +31,20 @@ func InitGinServer(cfg *config.Config) {
 	// repository
 	userRepository := repository.NewUserRepository(db)
 	imageRepository := repository.NewImageRepository(db)
+	friendRepository := repository.NewFriendRepository(db)
 
 	// usecase
 	authUsecase := usecase.NewAuthUsecaseImpl(userRepository, passwordEncryptor, imageRepository, jwtUtil)
 	imageUsecase := usecase.NewImageUsecaseImpl(imageRepository)
+	friendUsecase := usecase.NewFriendUsecaseImpl(
+		friendRepository,
+		userRepository,
+	)
 
 	// handler
 	authHandler := handler.NewAuthHandler(authUsecase)
 	imageHandler := handler.NewImageHandler(imageUsecase)
+	friendHandler := handler.NewFriendHandler(friendUsecase)
 
 	r.POST("/v1/user/register", authHandler.Register)
 	r.POST("/v1/user/login", authHandler.Login)
@@ -49,6 +55,10 @@ func InitGinServer(cfg *config.Config) {
 		ar.POST("/v1/user/link/email", authHandler.LinkEmail)
 		ar.POST("/v1/user/link/phone", authHandler.LinkPhone)
 		ar.PATCH("/v1/user", authHandler.UpdateAccount)
+
+		ar.GET("/v1/friend", friendHandler.GetFriendList)
+		ar.POST("/v1/friend", friendHandler.AddFriend)
+		ar.DELETE("/v1/friend", friendHandler.RemoveFriend)
 	}
 
 	v1 := r.Group("/v1")
