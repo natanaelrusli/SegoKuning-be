@@ -54,8 +54,6 @@ func (iu *imageUsecaseImpl) UploadImage(file *multipart.FileHeader) (*dto.ImageD
 	}
 
 	var newImageData dto.ImageData
-
-	newImageData.ID = int64(newImage.ID)
 	newImageData.URL = newImage.URL
 
 	return &newImageData, nil

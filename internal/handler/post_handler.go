@@ -39,10 +39,10 @@ func (ph *PostHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	response := dto.CreatePostResponse{
+	res := dto.CreatePostResponse{
 		Message: "Post created successfully",
 		Data:    *post,
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, res)
 }

@@ -30,7 +30,7 @@ type LinkPhoneRequest struct {
 }
 
 type ImageUploadRequest struct {
-	File *multipart.FileHeader `form:"file" validate:"required"`
+	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 type UpdateProfileRequest struct {
@@ -133,19 +133,19 @@ func (u *RegisterRequest) Validate() error {
 }
 
 func (r *ImageUploadRequest) Validate() error {
-	// // Check file type, must in *.jpg | *.jpeg format
-	// if r.File.Header.Get("Content-Type") != "image/jpeg" && r.File.Header.Get("Content-Type") != "image/jpg" {
-	// 	return apperror.ErrImageType
-	// }
+	// Check file type, must in *.jpg | *.jpeg format
+	if r.File.Header.Get("Content-Type") != "image/jpeg" && r.File.Header.Get("Content-Type") != "image/jpg" {
+		return apperror.ErrImageType
+	}
 
-	// // Check file size, no more than 2MB, no less than 10KB
-	// if r.File.Size < 10*1024 {
-	// 	return apperror.ErrImageSizeBelow
-	// }
+	// Check file size, no more than 2MB, no less than 10KB
+	if r.File.Size < 10*1024 {
+		return apperror.ErrImageSizeBelow
+	}
 
-	// if r.File.Size > 2*1024*1024 {
-	// 	return apperror.ErrImageSizeAbove
-	// }
+	if r.File.Size > 2*1024*1024 {
+		return apperror.ErrImageSizeAbove
+	}
 
 	return nil
 }

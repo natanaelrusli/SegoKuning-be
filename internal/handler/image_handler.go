@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ func NewImageHandler(imageUsecase usecase.ImageUsecase) *ImageHandler {
 	}
 }
 
-// NOTE-CLEAN4: Handler is on adapter layer, is used for handling http request, extract data (e.g. json, form body), doing necessary validation, and then delegate the actual business logic to the use case layer
+// NOTE-CLEAN4: Handler is on adapter layer, is used for handling http request, extract data (e.g. json,                                  body), doing necessary validation, and then delegate the actual business logic to the use case layer
 func (ih *ImageHandler) UploadImage(c *gin.Context) {
 	// file, err := c.FormFile("file")
 	// if err != nil {
@@ -34,27 +33,30 @@ func (ih *ImageHandler) UploadImage(c *gin.Context) {
 
 	var req dto.ImageUploadRequest
 
-	if err := c.Bind(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// err := req.Validate()
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	err := req.Validate()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	log.Print("before upload image")
-	res, err := ih.imageUsecase.UploadImage(req.File)
-	log.Println(err)
+	result, err := ih.imageUsecase.UploadImage(req.File)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Error uploading image, please try again",
 		})
 	}
 
-	c.JSON(http.StatusCreated, res)
+	res := dto.UploadImageResponse{
+		Message: "File uploaded sucessfully",
+		Data:    *result,
+	}
+
+	c.JSON(http.StatusOK, res)
 }

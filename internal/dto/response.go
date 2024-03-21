@@ -27,8 +27,8 @@ type LoginResponse struct {
 }
 
 type ImageData struct {
-	ID  int64  `json:"id"`
-	URL string `json:"url"`
+	// ID  int64  `json:"id"`
+	URL string `json:"imageUrl"`
 }
 
 type PostData struct {
@@ -42,4 +42,9 @@ type PostData struct {
 type CreatePostResponse struct {
 	Message string   `json:"message"`
 	Data    PostData `json:"data"`
+}
+
+type UploadImageResponse struct {
+	Message string    `json:"message"`
+	Data    ImageData `json:"data"`
 }
